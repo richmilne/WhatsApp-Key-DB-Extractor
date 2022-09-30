@@ -24,12 +24,10 @@ if not exist bin (
     echo.
     echo Exiting ...
     echo.
-    bin\adb.exe kill-server
-    pause
-    exit
+    goto clean_temp_files
 )
 
-echo Please connect your Android device with USB Debugging enabled:
+echo Please connect your Android device with USB Debugging enabled...
 echo.
 bin\adb.exe kill-server
 bin\adb.exe start-server
@@ -38,14 +36,11 @@ bin\adb.exe shell getprop ro.build.version.sdk > tmp\sdkver.txt
 set /p sdkver=<tmp\sdkver.txt
 echo.
 if %sdkver% leq 13 (
-    set sdkver=
     echo Unsupported Android Version - this method only works on 4.0 or higher :/
     echo.
-    echo Cleaning up temporary files ...
-    del tmp\sdkver.txt /s /q
-    echo.
     echo Exiting ...
-    goto end
+    echo.
+    goto clean_temp_files
 )
 
 bin\adb.exe shell pm path com.whatsapp | bin\grep.exe package > tmp\wapath.txt
@@ -68,14 +63,21 @@ for %%A in ("%apkpath%") do (
     set apkname=%%~nxA
 )
 
-:nextVar
 for /F "tokens=1" %%k in ("%version%") do (
     set %%k
     set version=%%v
 )
 
+echo sdkver=%sdkver%
+echo version=%version%
+echo versionName=%versionName%
+echo apkflen=%apkflen%
+echo apkfurl=%apkfurl%
+echo sdpath=%sdpath%
+echo apkpath=%apkpath%
+echo apkname=%apkname%
+echo.
 for %%A in (wapath.txt) do if %%~zA==0 (
-    set apkpath=
     echo.
     echo WhatsApp is not installed on the target device
     echo.
@@ -204,8 +206,6 @@ if exist tmp\apps (
 
 echo.
 echo Operation complete
-
-:end
 echo.
 bin\adb.exe kill-server
 pause
