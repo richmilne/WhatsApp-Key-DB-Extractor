@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 color 0a
-title WhatsApp Key/DB Extractor 4.7 (Official)
+title WhatsApp Key/DB Extractor 4.7.1 (fork)
 set LEGACY_VER=2.11.431
 set LEGACY_LEN=18329558
 set LEGACY_URL=http://www.cdn.whatsapp.net/android/%LEGACY_VER%/WhatsApp.apk
@@ -16,7 +16,7 @@ echo = permissions. You will NOT lose ANY data and your current version will =
 echo = be restored at the end of the extraction process so try not to panic. =
 echo = Script by: TripCode (Greets to all who visit: XDA Developers Forums). =
 echo = Thanks to: dragomerlin for ABE and to Abinash Bishoyi for being cool. =
-echo =         ###          Version: v4.7 (12/10/2016)          ###          =
+echo =         ###         Version: v4.7.1 (2022-09-30)         ###          =
 echo =========================================================================
 echo.
 if not exist bin (
@@ -45,7 +45,7 @@ if %sdkver% leq 13 (
     del tmp\sdkver.txt /s /q
     echo.
     echo Exiting ...
-goto end
+    goto end
 )
 
 bin\adb.exe shell pm path com.whatsapp | bin\grep.exe package > tmp\wapath.txt
