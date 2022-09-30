@@ -134,39 +134,20 @@ for %%A in (wapath.txt) do if %%~zA==0 (
                 java -jar bin\abe.jar unpack tmp\whatsapp.ab tmp\whatsapp.tar "!password!"
             )
 
+            set db_files=msgstore.db wa.db axolotl.db chatsettings.db
+            for %%f in (%db_files%) do (
+                bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/%%f
+                if exist tmp\apps\com.whatsapp\%%f (
+                    echo Extracting %%f...
+                    copy /y tmp\apps\com.whatsapp\db\%%f extracted\%%f
+                    echo.
+                )
+            )
+
             bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/f/key
-            bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/msgstore.db
-            bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/wa.db
-            bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/axolotl.db
-            bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/chatsettings.db
-            echo.
             if exist tmp\apps\com.whatsapp\f\key (
                 echo Extracting whatsapp.cryptkey ...
-                copy tmp\apps\com.whatsapp\f\key extracted\whatsapp.cryptkey
-                echo.
-            )
-
-            if exist tmp\apps\com.whatsapp\db\msgstore.db (
-                echo Extracting msgstore.db ...
-                copy tmp\apps\com.whatsapp\db\msgstore.db extracted\msgstore.db
-                echo.
-            )
-
-            if exist tmp\apps\com.whatsapp\db\wa.db (
-                echo Extracting wa.db ...
-                copy tmp\apps\com.whatsapp\db\wa.db extracted\wa.db
-                echo.
-            )
-
-            if exist tmp\apps\com.whatsapp\db\axolotl.db (
-                echo Extracting axolotl.db ...
-                copy tmp\apps\com.whatsapp\db\axolotl.db extracted\axolotl.db
-                echo.
-            )
-
-            if exist tmp\apps\com.whatsapp\db\chatsettings.db (
-                echo Extracting chatsettings.db ...
-                copy tmp\apps\com.whatsapp\db\chatsettings.db extracted\chatsettings.db
+                copy /y tmp\apps\com.whatsapp\f\key extracted\whatsapp.cryptkey
                 echo.
             )
 
@@ -177,37 +158,17 @@ for %%A in (wapath.txt) do if %%~zA==0 (
             )
 
             echo Cleaning up temporary files ...
-            echo.
-            if exist tmp\whatsapp.ab (
-                del tmp\whatsapp.ab /s /q
-            )
-
-            if exist tmp\whatsapp.tar (
-                del tmp\whatsapp.tar /s /q
-            )
-
-            if exist tmp\waplen.txt (
-                del tmp\waplen.txt /s /q
-            )
-
-            if exist tmp\sdpath.txt (
-                del tmp\sdpath.txt /s /q
-            )
-
-            if exist tmp\wapath.txt (
-                del tmp\wapath.txt /s /q
-            )
-
-            if exist tmp\wapver.txt (
-                del tmp\wapver.txt /s /q
-            )
-
-            if exist tmp\sdkver.txt (
-                del tmp\sdkver.txt /s /q
+            set temp_files=waplen.txt sdpath.txt wapath.txt wapver.txt sdkver.txt whatsapp.ab whatsapp.tar
+            for %%f in (%temp_files%) do (
+                if exist tmp\%%f (
+                    echo    Deleting tmp\%%f
+                    del /q tmp\%%f
+                )
             )
 
             if exist tmp\apps (
-                rmdir tmp\apps /s /q
+                echo    Deleting directory tmp\apps
+                rmdir /s /q tmp\apps
             )
 
             echo.
@@ -240,9 +201,7 @@ for %%A in (wapath.txt) do if %%~zA==0 (
     ) else (
         echo Operation failed
     )
-
 )
-
 )
 
 set sdkver=
