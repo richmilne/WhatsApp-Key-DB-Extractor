@@ -1,7 +1,7 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 color 0a
-title WhatsApp Key/DB Extractor 4.8 (fork)
+title WhatsApp Key/DB Extractor 4.8.1 (fork)
 set LEGACY_VER=2.11.431
 set LEGACY_LEN=18329558
 set LEGACY_URL=http://legacy-static-assets.androidapksfree.com/earth/androidbucket/WhatsApp-v%LEGACY_VER%-AndroidBucket.com.apk
@@ -16,7 +16,7 @@ echo = permissions. You will NOT lose ANY data and your current version will =
 echo = be restored at the end of the extraction process so try not to panic. =
 echo = Script by: TripCode (Greets to all who visit: XDA Developers Forums). =
 echo = Thanks to: dragomerlin for ABE and to Abinash Bishoyi for being cool. =
-echo =         ###          Version: v4.8 (2022-09-30)          ###          =
+echo =         ###         Version: v4.8.1 (2022-09-30)         ###          =
 echo =========================================================================
 echo.
 if not exist bin (
@@ -67,9 +67,9 @@ for %%A in ("%apkpath%") do (
     set apkname=%%~nxA
 )
 
-for /F "tokens=1" %%k in ("%version%") do (
-    set %%k
-    set version=%%v
+for /F "delims== tokens=1,2" %%k in ("%version%") do (
+    set %%k=%%l
+    REM echo Checking token "%%k" "(%%l)"
 )
 
 echo sdkver=%sdkver%
