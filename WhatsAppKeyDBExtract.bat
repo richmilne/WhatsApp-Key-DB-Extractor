@@ -16,7 +16,7 @@ echo = permissions. You will NOT lose ANY data and your current version will =
 echo = be restored at the end of the extraction process so try not to panic. =
 echo = Script by: TripCode (Greets to all who visit: XDA Developers Forums). =
 echo = Thanks to: dragomerlin for ABE and to Abinash Bishoyi for being cool. =
-echo =         ###         Version: v4.7.1 (2022-09-30)         ###          =
+echo =         ###         Version: v4.7.9 (2022-09-30)         ###          =
 echo =========================================================================
 echo.
 if not exist bin (
@@ -27,12 +27,15 @@ if not exist bin (
     goto clean_temp_files
 )
 
+set PATH=.\bin;%PATH%
+echo Running ADB version:
+adb version
 echo Please connect your Android device with USB Debugging enabled...
 echo.
-bin\adb.exe kill-server
-bin\adb.exe start-server
-bin\adb.exe wait-for-device
-bin\adb.exe shell getprop ro.build.version.sdk > tmp\sdkver.txt
+adb kill-server
+adb start-server
+adb wait-for-device
+adb shell getprop ro.build.version.sdk > tmp\sdkver.txt
 set /p sdkver=<tmp\sdkver.txt
 echo.
 if %sdkver% leq 13 (
@@ -43,10 +46,10 @@ if %sdkver% leq 13 (
     goto clean_temp_files
 )
 
-bin\adb.exe shell pm path com.whatsapp | bin\grep.exe package > tmp\wapath.txt
-bin\adb.exe shell "echo $EXTERNAL_STORAGE" > tmp\sdpath.txt
-bin\adb.exe shell dumpsys package com.whatsapp | bin\grep.exe versionName > tmp\wapver.txt
-bin\curl.exe -sI %LEGACY_URL% | bin\grep.exe Content-Length > tmp\waplen.txt
+adb shell pm path com.whatsapp | grep package > tmp\wapath.txt
+adb shell "echo $EXTERNAL_STORAGE" > tmp\sdpath.txt
+adb shell dumpsys package com.whatsapp | grep versionName > tmp\wapver.txt
+curl -sI %LEGACY_URL% | grep Content-Length > tmp\waplen.txt
 set /p apkflen=<tmp\waplen.txt
 set apkflen=%apkflen:Content-Length: =%
 if %apkflen% == %LEGACY_LEN% (
@@ -92,21 +95,21 @@ echo.
 if %versionName% equ %LEGACY_VER% goto backup_data
 if not exist %LEGACY_APK% (
     echo Downloading legacy WhatsApp %LEGACY_VER% to local folder...
-    bin\curl.exe -sS -o %LEGACY_APK% %apkfurl%
+    curl -sS -o %LEGACY_APK% %apkfurl%
 ) else (
     echo Found legacy WhatsApp %LEGACY_VER% in local folder.
 )
 
 echo.
 if %sdkver% geq 11 (
-    bin\adb.exe shell am force-stop com.whatsapp
+    adb shell am force-stop com.whatsapp
 ) else (
-    bin\adb.exe shell am kill com.whatsapp
+    adb shell am kill com.whatsapp
 )
 
 if not exist %ORIGINAL_APK% (
     echo Backing up installed WhatsApp %versionName%...
-    bin\adb.exe pull %apkpath% %ORIGINAL_APK%
+    adb pull %apkpath% %ORIGINAL_APK%
     echo Backup complete.
 ) else (
     echo Found installed WhatsApp %versionName% in local folder.
@@ -115,16 +118,16 @@ if not exist %ORIGINAL_APK% (
 echo.
 if %sdkver% geq 23 (
     echo Removing WhatsApp %versionName% skipping data
-    bin\adb.exe shell pm uninstall -k com.whatsapp
+    adb shell pm uninstall -k com.whatsapp
     echo Removal complete
     echo.
 )
 
 echo Installing legacy WhatsApp %LEGACY_VER%
 if %sdkver% geq 17 (
-    bin\adb.exe install -r -d %LEGACY_APK%
+    adb install -r -d %LEGACY_APK%
 ) else (
-    bin\adb.exe install -r %LEGACY_APK%
+    adb install -r %LEGACY_APK%
 )
 
 echo Install complete
@@ -132,9 +135,9 @@ echo.
 
 :backup_data
 if %sdkver% geq 23 (
-    bin\adb.exe backup -f tmp\whatsapp.ab com.whatsapp
+    adb backup -f tmp\whatsapp.ab com.whatsapp
 ) else (
-    bin\adb.exe backup -f tmp\whatsapp.ab -noapk com.whatsapp
+    adb backup -f tmp\whatsapp.ab -noapk com.whatsapp
 )
 
 if not exist tmp\whatsapp.ab (
@@ -154,7 +157,7 @@ if "!password!" == "" (
 
 set db_files=msgstore.db wa.db axolotl.db chatsettings.db
 for %%f in (%db_files%) do (
-    bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/%%f
+    tar xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/db/%%f
     if exist tmp\apps\com.whatsapp\%%f (
         echo Extracting %%f...
         copy /y tmp\apps\com.whatsapp\db\%%f extracted\%%f
@@ -162,7 +165,7 @@ for %%f in (%db_files%) do (
     )
 )
 
-bin\tar.exe xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/f/key
+tar xvf tmp\whatsapp.tar -C tmp\ apps/com.whatsapp/f/key
 if exist tmp\apps\com.whatsapp\f\key (
     echo Extracting whatsapp.cryptkey...
     copy /y tmp\apps\com.whatsapp\f\key extracted\whatsapp.cryptkey
@@ -171,7 +174,7 @@ if exist tmp\apps\com.whatsapp\f\key (
 
 if exist tmp\apps\com.whatsapp\f\key (
     echo Pushing cipher key to: %sdpath%/WhatsApp/Databases/.nomedia
-    bin\adb.exe push tmp\apps\com.whatsapp\f\key %sdpath%/WhatsApp/Databases/.nomedia
+    adb push tmp\apps\com.whatsapp\f\key %sdpath%/WhatsApp/Databases/.nomedia
     echo.
 )
 
@@ -179,9 +182,9 @@ if exist tmp\apps\com.whatsapp\f\key (
 if exist %ORIGINAL_APK% (
     echo Restoring WhatsApp %versionName%
     if %sdkver% geq 17 (
-        bin\adb.exe install -r -d %ORIGINAL_APK%
+        adb install -r -d %ORIGINAL_APK%
     ) else (
-        bin\adb.exe install -r %ORIGINAL_APK%
+        adb install -r %ORIGINAL_APK%
     )
 
     echo.
@@ -207,6 +210,6 @@ if exist tmp\apps (
 echo.
 echo Operation complete
 echo.
-bin\adb.exe kill-server
+adb kill-server
 pause
 exit
