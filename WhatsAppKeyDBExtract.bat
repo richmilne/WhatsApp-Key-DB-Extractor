@@ -45,10 +45,7 @@ if %sdkver% leq 13 (
     del tmp\sdkver.txt /s /q
     echo.
     echo Exiting ...
-    echo.
-    bin\adb.exe kill-server
-    pause
-    exit
+goto end
 )
 
 bin\adb.exe shell pm path com.whatsapp | bin\grep.exe package > tmp\wapath.txt
@@ -209,18 +206,9 @@ for %%A in (wapath.txt) do if %%~zA==0 (
 )
 )
 
-set sdkver=
-set apkpath=
-set sdpath=
-set apkname=
-set apkflen=
-set apkfurl=
-set version=
-set versInfo=
-set versionName=
-set password=
 echo.
 echo Operation complete
+:end
 echo.
 bin\adb.exe kill-server
 pause
