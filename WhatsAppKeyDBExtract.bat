@@ -2,11 +2,15 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 color 0a
 title WhatsApp Key/DB Extractor 4.7 (Official)
+set LEGACY_VER=2.11.431
+set LEGACY_LEN=18329558
+set LEGACY_URL=http://www.cdn.whatsapp.net/android/%LEGACY_VER%/WhatsApp.apk
+set LEGACY_APK=tmp\WhatsAppLegacy-%LEGACY_VER%.apk
 echo.
 echo =========================================================================
 echo = This script will extract the WhatsApp Key file and DB on Android 4.0+ =
 echo = You DO NOT need root for this to work but you DO need Java installed. =
-echo = If your WhatsApp version is greater than 2.11.431 (most likely), then =
+echo = If your WhatsApp version is greater than %LEGACY_VER% (most likely), then =
 echo = a legacy version will be installed temporarily in order to get backup =
 echo = permissions. You will NOT lose ANY data and your current version will =
 echo = be restored at the end of the extraction process so try not to panic. =
@@ -50,13 +54,13 @@ if %sdkver% leq 13 (
 bin\adb.exe shell pm path com.whatsapp | bin\grep.exe package > tmp\wapath.txt
 bin\adb.exe shell "echo $EXTERNAL_STORAGE" > tmp\sdpath.txt
 bin\adb.exe shell dumpsys package com.whatsapp | bin\grep.exe versionName > tmp\wapver.txt
-bin\curl.exe -sI http://www.cdn.whatsapp.net/android/2.11.431/WhatsApp.apk | bin\grep.exe Content-Length > tmp\waplen.txt
+bin\curl.exe -sI %LEGACY_URL% | bin\grep.exe Content-Length > tmp\waplen.txt
 set /p apkflen=<tmp\waplen.txt
 set apkflen=%apkflen:Content-Length: =%
-if %apkflen% == 18329558 (
-    set apkfurl=http://www.cdn.whatsapp.net/android/2.11.431/WhatsApp.apk
+if %apkflen% == %LEGACY_LEN% (
+    set apkfurl=%LEGACY_URL%
 ) else (
-    set apkfurl=http://whatcrypt.com/WhatsApp-2.11.431.apk
+    set apkfurl=http://whatcrypt.com/WhatsApp-%LEGACY_VER%.apk
 )
 
 set /p apkpath=<tmp\wapath.txt
@@ -81,14 +85,15 @@ for %%A in (wapath.txt) do if %%~zA==0 (
     echo Exiting ...
     echo.
 ) else (
+    set ORIGINAL_APK=tmp\WhatsAppInstalled-%versionName%.apk
     echo WhatsApp %versionName% installed
     echo.
-    if %versionName% gtr 2.11.431 (
-        if not exist tmp\LegacyWhatsApp.apk (
-            echo Downloading legacy WhatsApp 2.11.431 to local folder
-            bin\curl.exe -o tmp\LegacyWhatsApp.apk %apkfurl%
+    if %versionName% gtr %LEGACY_VER% (
+        if not exist %LEGACY_APK% (
+            echo Downloading legacy WhatsApp %LEGACY_VER% to local folder
+            bin\curl.exe -o %LEGACY_APK% %apkfurl%
         ) else (
-            echo Found legacy WhatsApp 2.11.431 in local folder
+            echo Found legacy WhatsApp %LEGACY_VER% in local folder
         )
 
         echo.
@@ -98,9 +103,14 @@ for %%A in (wapath.txt) do if %%~zA==0 (
             bin\adb.exe shell am kill com.whatsapp
         )
 
-        echo Backing up WhatsApp %versionName%
-        bin\adb.exe pull %apkpath% tmp
-        echo Backup complete
+        if not exist %ORIGINAL_APK% (
+            echo Backing up installed WhatsApp %versionName%...
+            bin\adb.exe pull %apkpath% %ORIGINAL_APK%
+            echo Backup complete
+        ) else (
+            echo Found installed WhatsApp %versionName% in local folder.
+        )
+
         echo.
         if %sdkver% geq 23 (
             echo Removing WhatsApp %versionName% skipping data
@@ -109,11 +119,11 @@ for %%A in (wapath.txt) do if %%~zA==0 (
             echo.
         )
 
-        echo Installing legacy WhatsApp 2.11.431
+        echo Installing legacy WhatsApp %LEGACY_VER%
         if %sdkver% geq 17 (
-            bin\adb.exe install -r -d tmp\LegacyWhatsApp.apk
+            bin\adb.exe install -r -d %LEGACY_APK%
         ) else (
-            bin\adb.exe install -r tmp\LegacyWhatsApp.apk
+            bin\adb.exe install -r %LEGACY_APK%
         )
 
         echo Install complete
@@ -178,24 +188,19 @@ for %%A in (wapath.txt) do if %%~zA==0 (
             echo Operation failed
         )
 
-        if not exist tmp\%apkname% (
-            echo Downloading WhatsApp %versionName% to local folder
-            bin\curl.exe -o tmp\%apkname% http://www.cdn.whatsapp.net/android/%versionName%/WhatsApp.apk
-        )
-
-        if exist tmp\%apkname% (
+        if exist %ORIGINAL_APK% (
             echo Restoring WhatsApp %versionName%
             if %sdkver% geq 17 (
-                bin\adb.exe install -r -d tmp\%apkname%
+                bin\adb.exe install -r -d %ORIGINAL_APK%
             ) else (
-                bin\adb.exe install -r tmp\%apkname%
+                bin\adb.exe install -r %ORIGINAL_APK%
             )
 
             echo.
             echo Restore complete
             echo.
-            echo Removing WhatsApp %versionName% temporary apk
-            del tmp\%apkname% /s /q
+            REM echo Removing WhatsApp %versionName% temporary apk
+            REM del %ORIGINAL_APK% /s /q
         )
 
     ) else (
