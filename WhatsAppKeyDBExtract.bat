@@ -1,10 +1,10 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 color 0a
-title WhatsApp Key/DB Extractor 4.7.9 (fork)
+title WhatsApp Key/DB Extractor 4.8 (fork)
 set LEGACY_VER=2.11.431
 set LEGACY_LEN=18329558
-set LEGACY_URL=http://www.cdn.whatsapp.net/android/%LEGACY_VER%/WhatsApp.apk
+set LEGACY_URL=http://legacy-static-assets.androidapksfree.com/earth/androidbucket/WhatsApp-v%LEGACY_VER%-AndroidBucket.com.apk
 set LEGACY_APK=tmp\WhatsAppLegacy-%LEGACY_VER%.apk
 echo.
 echo =========================================================================
@@ -16,7 +16,7 @@ echo = permissions. You will NOT lose ANY data and your current version will =
 echo = be restored at the end of the extraction process so try not to panic. =
 echo = Script by: TripCode (Greets to all who visit: XDA Developers Forums). =
 echo = Thanks to: dragomerlin for ABE and to Abinash Bishoyi for being cool. =
-echo =         ###         Version: v4.7.9 (2022-09-30)         ###          =
+echo =         ###          Version: v4.8 (2022-09-30)          ###          =
 echo =========================================================================
 echo.
 if not exist bin (
@@ -56,6 +56,7 @@ if %apkflen% == %LEGACY_LEN% (
     set apkfurl=%LEGACY_URL%
 ) else (
     set apkfurl=http://whatcrypt.com/WhatsApp-%LEGACY_VER%.apk
+    REM Domain "whatcrypt.com" no longer in use.
 )
 
 set /p apkpath=<tmp\wapath.txt
@@ -209,8 +210,6 @@ if exist tmp\apps (
 
 echo.
 echo Operation complete
-
-:end
 echo.
 adb kill-server
 pause
