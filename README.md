@@ -7,6 +7,7 @@ See [this XDA Forums thread](https://forum.xda-developers.com/t/tool-whatsapp-ke
 
 ## BRANCH UPDATES:
 
+ * v4.8.1 - Fixed small error where installed version number wasn't being parsed and preserved properly.
  * v4.8   - Legacy URLs no longer work; replaced with links to [APKsFree.com](https://androidapksfree.com/whatsapp-messenger/com-whatsapp).
  * v4.7.9 - Flattened code structure and added local binary dir to path.
  * v4.7.1 - Refactored code to make structure clearer and reduce redundancy.
